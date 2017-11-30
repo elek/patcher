@@ -6,6 +6,9 @@ import (
 	"github.com/tcnksm/go-gitconfig"
 	"strings"
 	"github.com/getlantern/errors"
+	"path/filepath"
+	"os"
+	"path"
 )
 
 type WorkEnv struct {
@@ -34,11 +37,17 @@ func createJiraClient() *jira.Client {
 	return jiraClient
 
 }
+
 func detectWorkEnv(dir string) (WorkEnv, error) {
 	workEnv := WorkEnv{}
-	repository, err := git.PlainOpen(dir)
+	gitDir, err := findGitDir(dir)
 	if err != nil {
 		return workEnv, errors.New("Can't find git repository", err)
+
+	}
+	repository, err := git.PlainOpen(gitDir)
+	if err != nil {
+		return workEnv, errors.New("Can't open git repository", err)
 	}
 	config, err := repository.Config()
 	if err != nil {
@@ -85,6 +94,15 @@ func detectWorkEnv(dir string) (WorkEnv, error) {
 		}
 	}
 	return workEnv, errors.New("No matching branch definition in .git/config file\nDefine branch with\n[patcher]\nbranch_name=jql_query")
+
+}
+func findGitDir(dir string) (string, error) {
+	for cdir := dir; cdir != "/"; cdir = filepath.Dir(dir) {
+		if _, err := os.Stat(path.Join(cdir, ".git")); !os.IsNotExist(err) {
+			return cdir, nil
+		}
+	}
+	return "", errors.New("Can't find .git in any parent directory.")
 
 }
 func findAttachments(jiraClient *jira.Client, issueKey string) ([]jira.Attachment, error) {
