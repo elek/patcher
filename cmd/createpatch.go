@@ -36,7 +36,10 @@ func upload(issueKey string, upload bool) {
 	if err != nil {
 		panic(err)
 	}
-	workEnv := detectWorkEnv(dir);
+	workEnv, err := detectWorkEnv(dir);
+	if err != nil {
+		panic(err)
+	}
 	patchName := createPatchFileName(maxId, issueKey, workEnv.Branch)
 	fileName := "/tmp/" + patchName
 	createPatch(fileName)

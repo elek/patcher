@@ -27,7 +27,10 @@ func patchlist() {
 	if err != nil {
 		panic(err)
 	}
-	workEnv := detectWorkEnv(dir)
+	workEnv, err := detectWorkEnv(dir)
+	if err != nil {
+		panic(err)
+	}
 	jiraClient := createJiraClient()
 	options := jira.SearchOptions{}
 	options.MaxResults = 50

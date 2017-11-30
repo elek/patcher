@@ -5,6 +5,7 @@ import (
 	"gopkg.in/src-d/go-git.v4"
 	"github.com/tcnksm/go-gitconfig"
 	"strings"
+	"github.com/getlantern/errors"
 )
 
 type WorkEnv struct {
@@ -33,14 +34,15 @@ func createJiraClient() *jira.Client {
 	return jiraClient
 
 }
-func detectWorkEnv(dir string) WorkEnv {
+func detectWorkEnv(dir string) (WorkEnv, error) {
+	workEnv := WorkEnv{}
 	repository, err := git.PlainOpen(dir)
 	if err != nil {
-		panic(err)
+		return workEnv, errors.New("Can't find git repository", err)
 	}
 	config, err := repository.Config()
 	if err != nil {
-		panic(err)
+		return workEnv, errors.New("Can't read git config of the git repository.", err)
 	}
 	for _, option := range (config.Raw.Section("patcher").Options) {
 
@@ -68,22 +70,21 @@ func detectWorkEnv(dir string) WorkEnv {
 					break
 				}
 				if reference.Hash().String() == commit.Hash.String() {
-
 					if strings.HasSuffix(reference.Name().Short(), "/"+option.Key) {
 						return WorkEnv{
 							Branch: option.Key,
 							Query:  option.Value,
-						}
+						}, nil
 					}
 				}
 			}
 			i++
 			if i > 20 {
-				return WorkEnv{}
+				break
 			}
 		}
 	}
-	return WorkEnv{}
+	return workEnv, errors.New("No matching branch definition in .git/config file\nDefine branch with\n[patcher]\nbranch_name=jql_query")
 
 }
 func findAttachments(jiraClient *jira.Client, issueKey string) ([]jira.Attachment, error) {
