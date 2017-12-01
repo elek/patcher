@@ -53,7 +53,7 @@ var commitPatchCmd = &cobra.Command{
 	Short: "Commit patch with the right commit message",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		commitPatch(args[0])
+		commitPatch(issueFromArgsOrDetect(args))
 	},
 }
 

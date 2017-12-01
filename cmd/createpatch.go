@@ -115,7 +115,7 @@ func init() {
 		Short: "Create patch and upload it to the jira.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			upload(args[0], doUpload)
+			upload(issueFromArgsOrDetect(args), doUpload)
 		},
 	}
 	createPatchCmd.Flags().BoolVarP(&doUpload, "upload", "u", false, "Upload to the jira after issue creation")

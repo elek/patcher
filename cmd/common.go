@@ -9,11 +9,51 @@ import (
 	"path/filepath"
 	"os"
 	"path"
+	"regexp"
 )
+
+var gitRepo *git.Repository
 
 type WorkEnv struct {
 	Branch string
 	Query  string
+}
+
+func GetGitRepo() (*git.Repository, error) {
+	if gitRepo != nil {
+		return gitRepo, nil
+	}
+	dir, err := os.Getwd()
+	if err != nil {
+		return gitRepo, errors.New("Can't find currnet directory")
+	}
+	gitRepo, err := openGit(dir)
+	return gitRepo, err
+}
+
+func issueFromArgsOrDetect(args []string) string {
+	if len(args) > 0 {
+		return args[0]
+	}
+	gitRepo, err := GetGitRepo();
+	if err != nil {
+		panic(err)
+	}
+	head, err := gitRepo.Head()
+	if err != nil {
+		panic(err)
+	}
+	head.Name().Short()
+	regexp, err := regexp.Compile("^[A-Z]+\\-[1-9]+")
+	if err != nil {
+		panic(err)
+	}
+	match := regexp.FindStringSubmatch(head.Name().Short())
+	if len(match) > 0 {
+		println("Detected issues is " + match[0])
+		return match[0]
+	}
+	panic("Issue is not defined and can't be determined")
 }
 
 func createJiraClient() *jira.Client {
@@ -99,7 +139,7 @@ func detectWorkEnv(dir string) (WorkEnv, error) {
 
 }
 func findGitDir(dir string) (string, error) {
-	for cdir := dir; cdir != "/"; cdir = filepath.Dir(dir) {
+	for cdir := dir; cdir != "/"; cdir = filepath.Dir(cdir) {
 		if _, err := os.Stat(path.Join(cdir, ".git")); !os.IsNotExist(err) {
 			return cdir, nil
 		}

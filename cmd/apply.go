@@ -76,7 +76,7 @@ var applyCmd = &cobra.Command{
 	Short: "Download patch from jira and apply",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		apply(args[0])
+		apply(issueFromArgsOrDetect(args))
 	},
 }
 

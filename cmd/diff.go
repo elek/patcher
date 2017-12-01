@@ -19,7 +19,6 @@ import (
 	"os/exec"
 	"fmt"
 	"errors"
-	"os"
 	"strings"
 	"gopkg.in/src-d/go-git.v4"
 )
@@ -33,11 +32,8 @@ func execute(command string, args ...string) {
 	fmt.Printf("%s", out)
 }
 func diff(issueKey string) {
-	dir, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	repository, err := openGit(dir)
+
+	repository, err := GetGitRepo()
 	if err != nil {
 		panic(err)
 	}
@@ -77,11 +73,13 @@ func branchExists(repository *git.Repository, branchName string) bool{
 var diffCmd = &cobra.Command{
 	Use:   "diff",
 	Short: "Compare the patch with the last commit of the current branch.",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		diff(args[0])
+		diff(issueFromArgsOrDetect(args))
 	},
 }
+
+
 
 func init() {
 	RootCmd.AddCommand(diffCmd)
