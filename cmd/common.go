@@ -37,15 +37,17 @@ func createJiraClient() *jira.Client {
 	return jiraClient
 
 }
-
-func detectWorkEnv(dir string) (WorkEnv, error) {
-	workEnv := WorkEnv{}
+func openGit(dir string) (*git.Repository, error) {
 	gitDir, err := findGitDir(dir)
 	if err != nil {
-		return workEnv, errors.New("Can't find git repository", err)
+		return nil, errors.New("Can't find git repository", err)
 
 	}
-	repository, err := git.PlainOpen(gitDir)
+	return git.PlainOpen(gitDir)
+}
+func detectWorkEnv(dir string) (WorkEnv, error) {
+	workEnv := WorkEnv{}
+	repository, err := openGit(dir)
 	if err != nil {
 		return workEnv, errors.New("Can't open git repository", err)
 	}

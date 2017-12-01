@@ -21,7 +21,7 @@ import (
 	"fmt"
 )
 
-func commitpatch(issueKey string) {
+func commitPatch(issueKey string) {
 	jiraClient := createJiraClient()
 	options := jira.GetQueryOptions{}
 	issue, _, err := jiraClient.Issue.Get(issueKey, &options)
@@ -53,7 +53,7 @@ var commitPatchCmd = &cobra.Command{
 	Short: "Commit patch with the right commit message",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		commitpatch(args[0])
+		commitPatch(args[0])
 	},
 }
 
