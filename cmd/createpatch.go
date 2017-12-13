@@ -113,7 +113,7 @@ func init() {
 	createPatchCmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create patch and upload it to the jira.",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			upload(issueFromArgsOrDetect(args), doUpload)
 		},

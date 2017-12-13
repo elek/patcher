@@ -74,7 +74,7 @@ func applyFile(fileName string) {
 var applyCmd = &cobra.Command{
 	Use:   "apply",
 	Short: "Download patch from jira and apply",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		apply(issueFromArgsOrDetect(args))
 	},
