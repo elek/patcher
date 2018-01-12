@@ -25,7 +25,7 @@ func GetGitRepo() (*git.Repository, error) {
 	}
 	dir, err := os.Getwd()
 	if err != nil {
-		return gitRepo, errors.New("Can't find currnet directory")
+		return gitRepo, errors.New("Can't find current directory")
 	}
 	gitRepo, err := openGit(dir)
 	return gitRepo, err
@@ -44,7 +44,7 @@ func issueFromArgsOrDetect(args []string) string {
 		panic(err)
 	}
 	head.Name().Short()
-	regexp, err := regexp.Compile("^[A-Z]+\\-[1-9]+")
+	regexp, err := regexp.Compile("^[A-Z]+\\-[0-9]+")
 	if err != nil {
 		panic(err)
 	}
