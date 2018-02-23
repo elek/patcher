@@ -10,6 +10,8 @@ import (
 	"os"
 	"path"
 	"regexp"
+
+	"fmt"
 )
 
 var gitRepo *git.Repository
@@ -35,6 +37,10 @@ func issueFromArgsOrDetect(args []string) string {
 	if len(args) > 0 {
 		return args[0]
 	}
+	return currentissue()
+}
+
+func currentissue() string {
 	gitRepo, err := GetGitRepo();
 	if err != nil {
 		panic(err)
@@ -50,11 +56,49 @@ func issueFromArgsOrDetect(args []string) string {
 	}
 	match := regexp.FindStringSubmatch(head.Name().Short())
 	if len(match) > 0 {
-		println("Detected issues is " + match[0])
+		println("Detected issues from branch name: " + match[0])
 		return match[0]
 	}
 	panic("Issue is not defined and can't be determined")
 }
+
+func basecommit() (string, error) {
+	gitRepo, err := GetGitRepo();
+	if err != nil {
+		panic(err)
+	}
+	return findbase(gitRepo)
+
+}
+func findbase(repository *git.Repository) (string, error) {
+	log, err := repository.Log(&git.LogOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	i := 0
+
+	for {
+		commit, err := log.Next()
+		if err != nil {
+			break
+		}
+
+		if (strings.Contains(commit.Message, "flokkr:base")) {
+			fmt.Printf("Detected base commit: %s %s ",
+				commit.Hash.String(),
+				commit.Message)
+
+			return fmt.Sprintf("%s^", commit.Hash.String()), nil
+		}
+		i++
+		if i > 50 {
+			break
+		}
+	}
+	return "HEAD^", nil
+}
+
 
 func createJiraClient() *jira.Client {
 	url := "https://issues.apache.org/jira/"
@@ -121,7 +165,7 @@ func detectWorkEnv(dir string) (WorkEnv, error) {
 					break
 				}
 				if reference.Hash().String() == commit.Hash.String() {
-					if strings.HasSuffix(reference.Name().Short(), "/"+option.Key) {
+					if strings.HasSuffix(reference.Name().Short(), option.Key) || reference.Name().Short() == option.Key {
 						return WorkEnv{
 							Branch: option.Key,
 							Query:  option.Value,
