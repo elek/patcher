@@ -24,7 +24,7 @@ import (
 	"strconv"
 )
 
-func upload(issueKey string, upload bool, branch string) {
+func upload(issueKey string, upload bool, branch string, baseref string) {
 	jiraClient := createJiraClient()
 	attachments, err := findAttachments(jiraClient, issueKey)
 	if (err != nil) {
@@ -46,7 +46,7 @@ func upload(issueKey string, upload bool, branch string) {
 	}
 	patchName := createPatchFileName(maxId, issueKey, branch)
 	fileName := "/tmp/" + patchName
-	createPatch(fileName)
+	createPatch(fileName, baseref)
 	println("Patch is created " + fileName + " and will be uploaded to " + issueKey)
 	if upload {
 		uploadPatch(jiraClient, issueKey, patchName, fileName)
@@ -81,11 +81,8 @@ func max(a, b int) int {
 	}
 	return a
 }
-func createPatch(fileName string) {
-	basecommit,err := basecommit()
-	if err != nil {
-		panic(err)
-	}
+func createPatch(fileName string, baseref string) {
+	basecommit := baseref
 	diffCommand := fmt.Sprintf("git diff %s..HEAD > %s", basecommit, fileName)
 	out, err := exec.Command("bash", "-c", diffCommand).CombinedOutput()
 	if err != nil {
@@ -119,18 +116,21 @@ func findMaxId(attachments []jira.Attachment) int {
 func init() {
 	var doUpload bool = false
 	var branch string
+	var base string
 	// applyCmd represents the apply command
 	createPatchCmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create patch and upload it to the jira.",
 		Args:  cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			upload(issueFromArgsOrDetect(args), doUpload, branch)
+			upload(issueFromArgsOrDetect(args), doUpload, branch, base)
 		},
 	}
 	createPatchCmd.Flags().BoolVarP(&doUpload, "upload", "u", false, "Upload to the jira after issue creation")
-	createPatchCmd.Flags().StringVar(&branch, "branch", "auto", "Define "+
-		"the working branch (auto means autodetect)")
+	createPatchCmd.Flags().StringVar(&branch, "branch", "auto", "Define "+ "the working branch (auto means autodetect)")
+	createPatchCmd.Flags().StringVar(&base, "base", "HEAD^", "Define the " +
+		"base commit which should be used to create the diff (git diff base." +
+			".HEAD")
 	RootCmd.AddCommand(createPatchCmd)
 
 }
