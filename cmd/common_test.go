@@ -5,6 +5,6 @@ import (
 )
 
 func TestDetectWorkEnv(t *testing.T) {
-	workEnv := detectWorkEnv(".")
-	println(workEnv.Branch)
+	branch, _ := detectWorkEnv(".")
+	println(branch)
 }

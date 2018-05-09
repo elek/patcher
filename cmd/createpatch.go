@@ -15,19 +15,20 @@
 package cmd
 
 import (
-	"github.com/andygrunwald/go-jira"
-	"github.com/spf13/cobra"
-	"os/exec"
 	"fmt"
 	"os"
+	"os/exec"
 	"regexp"
 	"strconv"
+
+	"github.com/andygrunwald/go-jira"
+	"github.com/spf13/cobra"
 )
 
-func upload(issueKey string, upload bool, branch string, baseref string) {
+func upload(issueKey string, upload bool, branch Branch, baseref string) {
 	jiraClient := createJiraClient()
 	attachments, err := findAttachments(jiraClient, issueKey)
-	if (err != nil) {
+	if err != nil {
 		panic(err)
 	}
 
@@ -38,11 +39,10 @@ func upload(issueKey string, upload bool, branch string, baseref string) {
 	}
 
 	if branch == "auto" {
-		workEnv, err := detectWorkEnv(dir);
+		branch, err = detectWorkEnv(dir)
 		if err != nil {
 			panic(err)
 		}
-		branch = workEnv.Branch
 	}
 	patchName := createPatchFileName(maxId, issueKey, branch)
 	fileName := "/tmp/" + patchName
@@ -69,7 +69,7 @@ func uploadPatch(jiraClient *jira.Client, issueKey string, patchName string, fil
 	if error != nil {
 		panic(error)
 	}
-	if (response.StatusCode > 400) {
+	if response.StatusCode > 400 {
 		print("HTTP response status is " + response.Status)
 	} else {
 		println("Patch is uploaded successfully. See: https://issues.apache.org/jira/browse/" + issueKey)
@@ -91,17 +91,17 @@ func createPatch(fileName string, baseref string) {
 	}
 	fmt.Printf("%s", out)
 }
-func createPatchFileName(maxId int, issueKey string, branch string) string {
+func createPatchFileName(maxId int, issueKey string, branch Branch) string {
 	if len(branch) > 0 && branch != "master" && branch != "trunk" {
-		return fmt.Sprintf("%s-%s.%03d.patch", issueKey, branch, maxId+1);
+		return fmt.Sprintf("%s-%s.%03d.patch", issueKey, branch, maxId+1)
 	} else {
-		return fmt.Sprintf("%s.%03d.patch", issueKey, maxId+1);
+		return fmt.Sprintf("%s.%03d.patch", issueKey, maxId+1)
 	}
 }
 func findMaxId(attachments []jira.Attachment) int {
 	maxId := 0
-	re := regexp.MustCompile(".+\\.0*(\\d+)\\.patch");
-	for _, attachment := range (attachments) {
+	re := regexp.MustCompile(".+\\.0*(\\d+)\\.patch")
+	for _, attachment := range attachments {
 		submatch := re.FindStringSubmatch(attachment.Filename)
 		if submatch != nil {
 			index, err := strconv.Atoi(submatch[1])
@@ -123,14 +123,14 @@ func init() {
 		Short: "Create patch and upload it to the jira.",
 		Args:  cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			upload(issueFromArgsOrDetect(args), doUpload, branch, base)
+			upload(issueFromArgsOrDetect(args), doUpload, Branch(branch), base)
 		},
 	}
 	createPatchCmd.Flags().BoolVarP(&doUpload, "upload", "u", false, "Upload to the jira after issue creation")
-	createPatchCmd.Flags().StringVar(&branch, "branch", "auto", "Define "+ "the working branch (auto means autodetect)")
-	createPatchCmd.Flags().StringVar(&base, "base", "HEAD^", "Define the " +
-		"base commit which should be used to create the diff (git diff base." +
-			".HEAD")
+	createPatchCmd.Flags().StringVar(&branch, "branch", "auto", "Define "+"the working branch (auto means autodetect)")
+	createPatchCmd.Flags().StringVar(&base, "base", "HEAD^", "Define the "+
+		"base commit which should be used to create the diff (git diff base."+
+		".HEAD")
 	RootCmd.AddCommand(createPatchCmd)
 
 }
