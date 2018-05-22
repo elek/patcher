@@ -83,7 +83,8 @@ func max(a, b int) int {
 }
 func createPatch(fileName string, baseref string) {
 	basecommit := baseref
-	diffCommand := fmt.Sprintf("git diff %s..HEAD > %s", basecommit, fileName)
+	diffCommand := fmt.Sprintf("git diff --binary %s..HEAD > %s", basecommit, fileName)
+	fmt.Println(diffCommand)
 	out, err := exec.Command("bash", "-c", diffCommand).CombinedOutput()
 	if err != nil {
 		fmt.Printf("%s", out)
