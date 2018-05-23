@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"errors"
 	"strings"
-	"gopkg.in/src-d/go-git.v4"
 )
 
 func execute(command string, args ...string) {
@@ -41,7 +40,7 @@ func diff(issueKey string) {
 	if err != nil {
 		panic(errors.New("Can't identify the current HEAD"))
 	}
-	if branchExists(repository, "patcher-test") {
+	if branchExists("patcher-test") {
 		execute("git", "branch", "-D", "patcher-test")
 	}
 	execute("git", "checkout", "-b", "patcher-test", "HEAD^")
@@ -51,22 +50,8 @@ func diff(issueKey string) {
 	execute("git", "checkout", ref.Name().Short())
 	execute("git", "diff", "HEAD", "patcher-test")
 }
-func branchExists(repository *git.Repository, branchName string) bool{
-	iter,err := repository.Branches()
-	if err!=nil{
-		panic(err)
-	}
-	for {
-		branch,err := iter.Next()
-		if err!=nil{
-			return false
-		}
-		print(branch.Name().Short())
-		if branch.Name().Short() == branchName {
-			return true
-		}
-	}
-	return false
+func branchExists(branchName string) bool {
+	return len(executeAndReturn(fmt.Sprintf("git branch %s", branchName))) > 0
 }
 
 // applyCmd represents the apply command

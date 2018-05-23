@@ -20,9 +20,9 @@ import (
 	"os/exec"
 	"regexp"
 	"strconv"
-
 	"github.com/andygrunwald/go-jira"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 func upload(issueKey string, upload bool, branch Branch, baseref string) {
@@ -39,10 +39,13 @@ func upload(issueKey string, upload bool, branch Branch, baseref string) {
 	}
 
 	if branch == "auto" {
-		branch, err = detectWorkEnv(dir)
+		branch, err = findBaseBranch(dir, "apache")
 		if err != nil {
+			fmt.Println(err.Error())
 			panic(err)
 		}
+		baseref = "apache/" + string(branch)
+
 	}
 	patchName := createPatchFileName(maxId, issueKey, branch)
 	fileName := "/tmp/" + patchName
@@ -84,7 +87,14 @@ func max(a, b int) int {
 func createPatch(fileName string, baseref string) {
 	basecommit := baseref
 	diffCommand := fmt.Sprintf("git diff --binary %s..HEAD > %s", basecommit, fileName)
-	fmt.Println(diffCommand)
+	logCommandIncluded := fmt.Sprintf("git log --pretty=oneline %s..HEAD", basecommit)
+	logCommandPre := fmt.Sprintf("git log --pretty=oneline %s~3..%s", basecommit, basecommit)
+
+	log.Println("Included commits: ")
+	executeAndPrint(logCommandIncluded)
+	log.Println("Excluded commits: ")
+	executeAndPrint(logCommandPre)
+	log.Print(diffCommand)
 	out, err := exec.Command("bash", "-c", diffCommand).CombinedOutput()
 	if err != nil {
 		fmt.Printf("%s", out)
@@ -92,6 +102,8 @@ func createPatch(fileName string, baseref string) {
 	}
 	fmt.Printf("%s", out)
 }
+
+
 func createPatchFileName(maxId int, issueKey string, branch Branch) string {
 	if len(branch) > 0 && branch != "master" && branch != "trunk" {
 		return fmt.Sprintf("%s-%s.%03d.patch", issueKey, branch, maxId+1)

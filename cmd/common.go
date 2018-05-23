@@ -13,6 +13,8 @@ import (
 	"github.com/getlantern/errors"
 	"github.com/tcnksm/go-gitconfig"
 	"gopkg.in/src-d/go-git.v4"
+	"fmt"
+	"bufio"
 )
 
 var gitRepo *git.Repository
@@ -54,19 +56,10 @@ func currentissue() string {
 	}
 	match := regexp.FindStringSubmatch(string(head))
 	if len(match) > 0 {
-		log.Printf("Detected issues: %s (from branch name convention)", match[0])
+		log.Printf("Detected issue: %s (from branch name convention)", match[0])
 		return match[0]
 	}
 	panic("Issue is not defined and can't be determined.")
-}
-
-func basecommit() (string, error) {
-	return "HEAD^", nil
-	//head, err := exec.Command("git", "log", "-n", "20", "--pretty=tformat:'%h %d %s'").Output()
-	//if err != nil {
-	//	return string(head), err
-	//}
-
 }
 
 func createJiraClient() *jira.Client {
@@ -100,44 +93,38 @@ func openGit(dir string) (*git.Repository, error) {
 	return git.PlainOpen(gitDir)
 }
 
-func detectWorkEnv(dir string) (Branch, error) {
-	repository, err := openGit(dir)
+func executeAndReturn(command string) string {
+	out, err := exec.Command("bash", "-c", command).CombinedOutput()
 	if err != nil {
-		return "", errors.New("Can't open git repository", err)
+		fmt.Printf("'%s' is failed\n", command)
+		fmt.Printf("%s\n", out)
+		panic(err)
 	}
+	return string(out)
+}
 
-	gitlog, err := repository.Log(&git.LogOptions{})
-	if err != nil {
-		return "", errors.New("Can't read git log", err)
-	}
-	var i = 0
-	for {
-		commit, err := gitlog.Next()
-		if err != nil {
-			break
-		}
+func executeAndPrint(command string) {
+	log.Printf("%s", executeAndReturn(command))
+}
 
-		references, err := repository.References()
-		for {
-			reference, err := references.Next()
-			if err != nil {
-				break
-			}
-			if reference.Hash().String() == commit.Hash.String() {
-				if strings.HasPrefix(reference.Name().Short(), "apache") {
-					branch := reference.Name().Short()[len("apache")+1:]
-					log.Printf("Detected branch: %s (it has apache prefix in the history)", branch)
-					return Branch(branch), nil
-				}
+func findBaseBranch(dir string, remotePrefix string) (Branch, error) {
+	decorate := executeAndReturn("git log HEAD~40..HEAD --pretty=\"%D\"")
+	scanner := bufio.NewScanner(strings.NewReader(decorate))
+	for scanner.Scan() {
+		line := scanner.Text()
+		for _, element := range (strings.Split(line, ",")) {
+			decoration := strings.TrimSpace(element)
+			if strings.HasPrefix(decoration, remotePrefix) {
+				branch := decoration[len(remotePrefix)+1:]
+				log.Printf("Detected branch: %s (it has apache prefix in the history)", branch)
+				return Branch(branch), nil
 			}
 		}
-		i++
-		if i > 40 {
-			break
-		}
 
 	}
-	return "", errors.New("Can't find the base branch in your current history. You may need a rebase.")
+
+	return "", fmt.Errorf("Can't find the base (a remote branch with prefix %s) "+
+		"branch in your current history. You may need a rebase.", remotePrefix)
 
 }
 
