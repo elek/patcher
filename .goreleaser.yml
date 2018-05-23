@@ -1,0 +1,9 @@
+
+builds:
+  - binary: patcher
+    goos:
+      - linux
+    goarch:
+      - amd64  
+
+
