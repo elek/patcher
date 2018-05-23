@@ -17,7 +17,6 @@ package cmd
 import (
 	"github.com/andygrunwald/go-jira"
 	"github.com/spf13/cobra"
-	"os/exec"
 	"fmt"
 )
 
@@ -37,14 +36,9 @@ func commitPatch(issueKey string) {
 		name = issue.Fields.Assignee.Name
 	}
 	commitMessage := fmt.Sprintf("%s. %s Contributed by %s.", issueKey, summary, name)
+	
+	executeAndPrint(fmt.Sprintf("git commit -m \"%s\"",commitMessage))
 
-	println("Committing changes: " + commitMessage)
-
-	out, err := exec.Command("git", "commit", "-m", commitMessage).CombinedOutput()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%s", out)
 }
 
 // applyCmd represents the apply command
