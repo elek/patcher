@@ -53,7 +53,10 @@ func apply(issueKey string) {
 	if err != nil {
 		panic(err)
 	}
-	println("Attachments:")
+	if (len(attachments) == 0) {
+		println(fmt.Sprintf("No attachments for %s", issueKey))
+		os.Exit(1)
+	}
 	lastPatch := attachments[len(attachments)-1]
 	println("Downloading " + lastPatch.Filename)
 
