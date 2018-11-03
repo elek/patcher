@@ -20,6 +20,8 @@ import (
 	"fmt"
 )
 
+var OmitContributor bool
+
 func commitPatch(issueKey string) {
 	jiraClient := createJiraClient()
 	options := jira.GetQueryOptions{}
@@ -31,12 +33,18 @@ func commitPatch(issueKey string) {
 	if summary[len(summary)-1] != '.' {
 		summary = summary + "."
 	}
-	name := issue.Fields.Assignee.DisplayName
-	if len(name) == 0 {
-		name = issue.Fields.Assignee.Name
+
+	contributedBy := ""
+	if (!OmitContributor) {
+		name := issue.Fields.Assignee.DisplayName
+		if len(name) == 0 {
+			name = issue.Fields.Assignee.Name
+		}
+		contributedBy = fmt.Sprintf(" Contributed by %s.", name)
 	}
-	commitMessage := fmt.Sprintf("%s. %s Contributed by %s.", issueKey, summary, name)
-	
+
+	commitMessage := fmt.Sprintf("%s. %s%s", issueKey, summary, contributedBy)
+
 	executeAndPrint(fmt.Sprintf("git commit -m \"%s\"",commitMessage))
 
 }
@@ -52,5 +60,6 @@ var commitPatchCmd = &cobra.Command{
 }
 
 func init() {
+	commitPatchCmd.Flags().BoolVarP(&OmitContributor, "omit-contributor", "C", false, "Omit 'Contributed by ...' from commit message")
 	RootCmd.AddCommand(commitPatchCmd)
 }
