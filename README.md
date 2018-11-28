@@ -10,7 +10,7 @@ Patcher is a simple tool to handle ASF patches:
 Typical workflow:
 
  * `git checkout -b HDDS-12`
- * `git apply HDDS-12` (downloads and applies the patch)
+ * `patcher apply HDDS-12` (downloads and applies the patch)
  * `git add`
  * `patcher commit` (downloads jira summary and creates commit message and commit)
  * `patcher create` (creates the patch file and save to /tmp/)
@@ -22,4 +22,4 @@ Typical workflow:
 
   * Name of the current JIRA issue. By default it comes from the branch name, but could be specified.
   * Name of the working branch. By default patcher tries to find a remote branch with apache prefix in the last 40 commits. It will be used as the working branch (could be adjusted by cli parameters). You always need to rebase or merge to the latest apache branch!
-  * Base commit of for the patch. Patcher supports multi-commit patches. By default the diff will be created between the workign branch (eg. apache/trunk) and the current HEAD.
+  * Base commit of  the patch. Patcher supports multi-commit patches. By default the diff will be created between the workign branch (eg. apache/trunk) and the current HEAD.
