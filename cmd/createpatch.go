@@ -44,7 +44,9 @@ func upload(issueKey string, upload bool, branch Branch, baseref string) {
 			fmt.Println(err.Error())
 			panic(err)
 		}
-		baseref = "apache/" + string(branch)
+		if baseref == "HEAD^" {
+			baseref = "apache/" + string(branch)
+		}
 
 	}
 	patchName := createPatchFileName(maxId, issueKey, branch)

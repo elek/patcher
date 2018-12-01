@@ -6,6 +6,7 @@ Patcher is a simple tool to handle ASF patches:
  * Create commit message based on the jira assignee and description.
  * Create patch and upload it to the jira.
 
+
  
 Typical workflow:
 
