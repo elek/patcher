@@ -2,7 +2,10 @@ package cmd
 
 import "github.com/andygrunwald/go-jira"
 import (
+	"bufio"
+	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -10,11 +13,11 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/bgentry/go-netrc/netrc"
 	"github.com/getlantern/errors"
+	"github.com/mitchellh/go-homedir"
 	"github.com/tcnksm/go-gitconfig"
 	"gopkg.in/src-d/go-git.v4"
-	"fmt"
-	"bufio"
 )
 
 var gitRepo *git.Repository
@@ -63,17 +66,8 @@ func currentissue() string {
 }
 
 func createJiraClient() *jira.Client {
-	url := "https://issues.apache.org/jira/"
-	user, err := gitconfig.Global("patcher.jira.username")
-	if err != nil {
-		user = ""
-	}
-	password, err := gitconfig.Global("patcher.jira.password")
-	if err != nil {
-		password = ""
-	}
-
-	jiraClient, err := jira.NewClient(nil, url)
+	user, password := findJiraAuth()
+	jiraClient, err := jira.NewClient(nil, JiraUrl)
 	if len(user) > 0 {
 		jiraClient.Authentication.SetBasicAuth(user, password)
 	}
@@ -81,7 +75,39 @@ func createJiraClient() *jira.Client {
 		panic(err)
 	}
 	return jiraClient
+}
 
+func findJiraAuth() (string, string) {
+	user := ""
+	password := ""
+	var err error
+	user, err = gitconfig.Global("patcher.jira.username")
+	if err == nil {
+		password, err = gitconfig.Global("patcher.jira.password")
+		if err == nil {
+			return user, password
+		}
+	}
+
+	user, password = "", ""
+	path := os.Getenv("NETRC")
+	if path == "" {
+		path, err = homedir.Expand("~/.netrc")
+		if err == nil {
+			n, err := netrc.ParseFile(path)
+			if err == nil {
+				u, err := url.Parse(JiraUrl)
+				if err == nil {
+					machine := n.FindMachine(u.Host)
+					if machine != nil {
+						return machine.Login, machine.Password
+					}
+				}
+			}
+		}
+	}
+
+	return "", ""
 }
 
 func openGit(dir string) (*git.Repository, error) {

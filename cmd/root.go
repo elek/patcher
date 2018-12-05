@@ -18,10 +18,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var JiraUrl string
+
 var RootCmd = &cobra.Command{
 	Use:   "patcher",
-	Short: "Utility to help patch management for ASF Jira",
-	Long: `Patcher provides helper utility to download/apply/upload new patchers to the apache jira according to the most
+	Short: "Utility to help patch management for Jira",
+	Long: `Patcher provides helper utility to download/apply/upload new patches to Jira according to the most
 	common naming convention`,
 }
 
@@ -33,5 +35,5 @@ func Execute() {
 }
 
 func init() {
-
+	RootCmd.PersistentFlags().StringVar(&JiraUrl, "jira", "https://issues.apache.org/jira/", "The JIRA instance to contact")
 }
