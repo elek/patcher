@@ -30,9 +30,6 @@ func commitPatch(issueKey string) {
 		panic(err)
 	}
 	summary := issue.Fields.Summary
-	if summary[len(summary)-1] != '.' {
-		summary = summary + "."
-	}
 
 	contributedBy := ""
 	if (!OmitContributor) {
@@ -41,6 +38,9 @@ func commitPatch(issueKey string) {
 			name = issue.Fields.Assignee.Name
 		}
 		contributedBy = fmt.Sprintf(" Contributed by %s.", name)
+		if summary[len(summary)-1] != '.' {
+			summary += "."
+		}
 	}
 
 	commitMessage := fmt.Sprintf("%s. %s%s", issueKey, summary, contributedBy)
