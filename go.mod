@@ -1,0 +1,34 @@
+module github.com/elek/patcher
+
+require (
+	github.com/andygrunwald/go-jira v1.0.0
+	github.com/fatih/structs v1.0.0
+	github.com/getlantern/context v0.0.0-20160525112039-624d99b1798d
+	github.com/getlantern/errors v0.0.0-20171205155502-e9c0296368b7
+	github.com/getlantern/hex v0.0.0-20160523043825-083fba3033ad
+	github.com/getlantern/hidden v0.0.0-20160523043807-d52a649ab33a
+	github.com/getlantern/ops v0.0.0-20170904182230-37353306c908
+	github.com/getlantern/stack v1.5.0
+	github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135
+	github.com/inconshreveable/mousetrap v1.0.0
+	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99
+	github.com/kevinburke/ssh_config v0.0.0-20180127194858-0ff8514904a8
+	github.com/mattn/go-runewidth v0.0.2
+	github.com/mitchellh/go-homedir v0.0.0-20161203194507-b8bc1bf76747
+	github.com/olekukonko/tablewriter v0.0.0-20180130162743-b8a9be070da4
+	github.com/pelletier/go-buffruneio v0.2.0
+	github.com/sergi/go-diff v1.0.0
+	github.com/spf13/cobra v0.0.1
+	github.com/spf13/pflag v1.0.0
+	github.com/src-d/gcfg v1.3.0
+	github.com/tcnksm/go-gitconfig v0.1.2
+	github.com/trivago/tgo v1.0.1
+	github.com/xanzy/ssh-agent v0.1.0
+	golang.org/x/crypto v0.0.0-20180222182404-49796115aa4b
+	golang.org/x/net v0.0.0-20180218175443-cbe0f9307d01
+	golang.org/x/sys v0.0.0-20180222210305-c1138c84af3a
+	golang.org/x/text v0.3.0
+	gopkg.in/src-d/go-billy.v4 v4.1.0
+	gopkg.in/src-d/go-git.v4 v4.1.1
+	gopkg.in/warnings.v0 v0.1.2
+)
