@@ -1,5 +1,7 @@
 github.com/andygrunwald/go-jira v1.0.0 h1:T14/B3DRhvHqcPbA2VBplVaVSEwwN50SxhPtZpgPBJ4=
 github.com/andygrunwald/go-jira v1.0.0/go.mod h1:yNYQrX3nGSrVdcVsM2mWz2pm7tTeDtYfRyVEkc3VUiY=
+github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d h1:xDfNPAt8lFiC1UJrqV3uuy861HCTo708pDMbjHHdCas=
+github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d/go.mod h1:6QX/PXZ00z/TKoufEY6K/a0k6AhaJrQKdFe6OfVXsa4=
 github.com/fatih/structs v1.0.0 h1:BrX964Rv5uQ3wwS+KRUAJCBBw5PQmgJfJ6v4yly5QwU=
 github.com/fatih/structs v1.0.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
 github.com/getlantern/context v0.0.0-20160525112039-624d99b1798d h1:UIZcMnqh939ljD/jzHgDTLehvwaBRNt2o3WMlyYplNY=

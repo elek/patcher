@@ -2,6 +2,7 @@ module github.com/elek/patcher
 
 require (
 	github.com/andygrunwald/go-jira v1.0.0
+	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d
 	github.com/fatih/structs v1.0.0
 	github.com/getlantern/context v0.0.0-20160525112039-624d99b1798d
 	github.com/getlantern/errors v0.0.0-20171205155502-e9c0296368b7
