@@ -19,6 +19,7 @@ import (
 )
 
 var JiraUrl string
+var TokenAuth bool
 
 var RootCmd = &cobra.Command{
 	Use:   "patcher",
@@ -36,4 +37,5 @@ func Execute() {
 
 func init() {
 	RootCmd.PersistentFlags().StringVar(&JiraUrl, "jira", "https://issues.apache.org/jira/", "The JIRA instance to contact")
+	RootCmd.PersistentFlags().BoolVar(&TokenAuth, "token", false, "Use Personal Access Token authentication")
 }

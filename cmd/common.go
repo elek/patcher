@@ -66,11 +66,23 @@ func currentissue() string {
 }
 
 func createJiraClient() *jira.Client {
-	user, password := findJiraAuth()
-	jiraClient, err := jira.NewClient(nil, JiraUrl)
-	if len(user) > 0 {
-		jiraClient.Authentication.SetBasicAuth(user, password)
+	var jiraClient *jira.Client
+	var err error
+
+	if TokenAuth {
+		_, password := findJiraAuth()
+		pat := &jira.PATAuthTransport{
+			Token: password,
+		}
+		jiraClient, err = jira.NewClient(pat.Client(), JiraUrl)
+	} else {
+		user, password := findJiraAuth()
+		jiraClient, err = jira.NewClient(nil, JiraUrl)
+		if len(user) > 0 {
+			jiraClient.Authentication.SetBasicAuth(user, password)
+		}
 	}
+
 	if err != nil {
 		panic(err)
 	}
